@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+/* Dark theme is the default and only theme for now — applied globally so
+   every page inherits it without repeating bg-neutral-950 text-white
+   on every single page component. */
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: #0a0a0a; /* neutral-950 */
+  color: #f5f5f5;
+}

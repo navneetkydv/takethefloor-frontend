@@ -3,10 +3,11 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '../../store/auth.store.js';
 import { useEntitlementStore } from '../../store/entitlement.store.js';
+import { RecorderScreen } from '../../components/recorder/RecorderScreen.jsx';
 
 export function DashboardPage() {
   const { user, signOut } = useAuthStore();
-  const { isPaid, entitlement, fetch: fetchEntitlement } = useEntitlementStore();
+  const { isPaid, entitlement, isLoading, fetch: fetchEntitlement } = useEntitlementStore();
 
   useEffect(() => {
     fetchEntitlement();
@@ -21,11 +22,29 @@ export function DashboardPage() {
         </button>
       </div>
 
-      <p className="mt-4">
+      <p className="mt-4 text-sm text-gray-500">
         Plan status: {isPaid ? `Paid (${entitlement?.planType})` : 'Not subscribed'}
       </p>
 
-      {/* Recorder component goes here next */}
+      <div className="mt-8">
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : isPaid ? (
+          <RecorderScreen />
+        ) : (
+          <div className="mx-auto max-w-md rounded-xl border border-gray-200 p-8 text-center">
+            <p className="text-lg font-medium">Subscribe to start practicing</p>
+            <p className="mt-2 text-sm text-gray-500">
+              Unlock daily speaking practice with AI feedback.
+            </p>
+            {/* Payments flow wires in here next */}
+          </div>
+        )}
+      </div>
+      <div className="mt-8 text-sm text-gray-400">
+         <RecorderScreen />
+      </div>
+
     </main>
   );
 }
