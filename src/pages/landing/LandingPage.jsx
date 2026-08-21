@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 import heroImg from "../../assets/hero-bgf.png";
 import navImg from "../../assets/logo.png";
 import PricingComp from "../../components/payments/PricingComp.jsx";
 import { useAuthStore } from '../../store/auth.store.js';
+import { SpinnerHomePreview } from "../../components/recorder/SpinnerHomePreview.jsx";
 
 const STEPS = [
   {
@@ -99,11 +101,22 @@ const METRICS = [
 ];
 
 export function LandingPage() {
+   const spinnerRef = useRef(null); // Add this
+
+  const scrollToSpinner = () => { // Add this
+    spinnerRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       <Nav />
-      <Hero />
+      <Hero onTryClick={scrollToSpinner}/>
       <HowItWorks />
+      <div ref={spinnerRef} id="try-spinner"> 
+      <SpinnerHomePreview/>
+      </div>
       <SpeechCoach />
       <Audiences />
       <PricingComp />
@@ -139,7 +152,7 @@ function Nav() {
   );
 }
 
-function Hero() {
+function Hero({ onTryClick }) { // Add the prop
   return (
     <section className="mx-auto flex max-w-7xl flex-col items-center px-6 py-12 text-center">
       <h1 className="p-2 text-4xl font-bold text-zinc-200 sm:text-5xl">
@@ -155,12 +168,12 @@ function Hero() {
         challenge that trains you to speak with{" "}
         <span className="italic text-violet-400">confidence</span>.
       </p>
-      <Link
-        to="/login"
+      <button // Change this from Link to button
+        onClick={onTryClick} // Add this
         className="mt-8 rounded-full bg-violet-50 px-8 py-3 font-medium hover:bg-violet-100"
       >
         <span className="text-black">Try it free →</span>
-      </Link>
+      </button>
       <img
         src={heroImg}
         alt="Speaking challenge"
@@ -169,6 +182,7 @@ function Hero() {
     </section>
   );
 }
+
 
 /* ---------- How it works: preview visuals ---------- */
 

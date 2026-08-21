@@ -6,8 +6,9 @@
 
 import { useRef, useState, useCallback, useEffect } from 'react';
 
-const DEFAULT_MAX_SECONDS = 10 * 60; // 10 minutes
+const DEFAULT_MAX_SECONDS = 60; // 60 seconds
 const EXTEND_SECONDS = 30;
+const MAX_EXTENDS = 3;
 
 function pickMimeType() {
   const candidates = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'];
@@ -18,6 +19,7 @@ export function useRecorder() {
   const [status, setStatus] = useState('idle'); // idle | recording | stopped
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [maxSeconds, setMaxSeconds] = useState(DEFAULT_MAX_SECONDS);
+  const [extendCount, setExtendCount] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [error, setError] = useState(null);
@@ -40,6 +42,7 @@ export function useRecorder() {
     setAudioUrl(null);
     setElapsedSeconds(0);
     setMaxSeconds(DEFAULT_MAX_SECONDS);
+    setExtendCount(0);
     chunksRef.current = [];
 
     try {
@@ -86,13 +89,34 @@ export function useRecorder() {
   }, [elapsedSeconds, maxSeconds, status, stop]);
 
   const extend = useCallback(() => {
-    setMaxSeconds((prev) => prev + EXTEND_SECONDS);
+    setExtendCount((prev) => {
+      if (prev >= MAX_EXTENDS) return prev;
+      setMaxSeconds((m) => m + EXTEND_SECONDS);
+      return prev + 1;
+    });
+  }, []);
+
+  // Discards the in-progress recording entirely (no preview/save) — used by
+  // the "back" button to return straight to topic selection.
+  const cancel = useCallback(() => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.onstop = null; // prevent the normal onstop -> 'stopped' transition
+      if (mediaRecorderRef.current.state !== 'inactive') mediaRecorderRef.current.stop();
+    }
+    clearInterval(timerRef.current);
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    chunksRef.current = [];
+    setStatus('idle');
+    setElapsedSeconds(0);
+    setMaxSeconds(DEFAULT_MAX_SECONDS);
+    setExtendCount(0);
   }, []);
 
   const reset = useCallback(() => {
     setStatus('idle');
     setElapsedSeconds(0);
     setMaxSeconds(DEFAULT_MAX_SECONDS);
+    setExtendCount(0);
     setAudioBlob(null);
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     setAudioUrl(null);
@@ -113,12 +137,15 @@ export function useRecorder() {
     status,
     elapsedSeconds,
     maxSeconds,
+    extendCount,
+    canExtend: extendCount < MAX_EXTENDS,
     audioBlob,
     audioUrl,
     error,
     start,
     stop,
     extend,
+    cancel,
     reset,
   };
 }

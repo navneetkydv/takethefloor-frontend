@@ -40,7 +40,7 @@ export function CheckoutPage() {
     setCouponChecking(true);
     setCouponError(null);
     try {
-      const result = await validateCoupon({ code: couponInput.trim(), planType: planKey });
+      const result = await validateCoupon({ code: couponInput.trim().toUpperCase(), planType: planKey });
       setAppliedCoupon(result);
     } catch (err) {
       setAppliedCoupon(null);
@@ -59,7 +59,7 @@ export function CheckoutPage() {
   const handlePay = async () => {
     const success = await pay({
       planType: planKey,
-      couponCode: appliedCoupon ? couponInput.trim() : undefined,
+      couponCode: appliedCoupon ? couponInput.trim().toUpperCase() : undefined,
     });
     if (success) navigate('/app');
   };

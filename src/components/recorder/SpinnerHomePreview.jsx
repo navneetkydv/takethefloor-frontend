@@ -13,7 +13,7 @@ import { CategoryPicker } from './CategoryPicker.jsx';
 import { TopicSpinner } from './TopicSpinner.jsx';
 import { CircularTimer } from './CircularTimer.jsx';
 
-export function RecorderScreen() {
+export function SpinnerHomePreview() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [topic, setTopic] = useState(null);
   const [submitState, setSubmitState] = useState('idle'); // idle | uploading | done | error
@@ -75,6 +75,10 @@ export function RecorderScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 py-6 sm:px-6 sm:py-8">
+       <h2 className="text-center text-2xl font-semibold sm:text-3xl">
+        Spin for a {" "}
+        <span className="font-serif italic text-violet-300">topic</span>
+      </h2>
       {status === 'idle' && (
         <div className="flex w-full flex-col items-center gap-6">
           <CategoryPicker selected={selectedCategories} onToggle={toggleCategory} />
@@ -141,7 +145,7 @@ export function RecorderScreen() {
               disabled={submitState === 'uploading'}
               className="w-full rounded-full bg-violet-500 px-6 py-3 text-white transition hover:bg-violet-600 disabled:opacity-50 sm:w-auto"
             >
-              {submitState === 'uploading' ? 'Processing…' : 'Submit for evaluation'}
+              {submitState === 'uploading' ? 'Processing…' : 'Subscribe to get feedback →'}
             </button>
           </div>
           {submitState === 'uploading' && (
@@ -158,46 +162,6 @@ export function RecorderScreen() {
   );
 }
 
-function ResultView({ result, onPracticeAgain }) {
-  const feedback = result.llmFeedback;
-
-  return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6 text-white sm:px-6 sm:py-8">
-      <h2 className="text-xl font-semibold">Your results</h2>
-
-      <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-        <Stat label="Overall" value={feedback?.overallScore} />
-        <Stat label="Clarity" value={feedback?.clarityScore} />
-        <Stat label="Structure" value={feedback?.structureScore} />
-        <Stat label="Fluency" value={feedback?.fluencyScore} />
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-gray-300">
-        {result.wpm} WPM · {result.pauseCount} long pauses · {result.fillerWordCount} filler words
-      </div>
-
-      {feedback?.summary && <p className="text-gray-300">{feedback.summary}</p>}
-
-      {feedback?.improvements?.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="font-medium">To improve:</p>
-          <ul className="mt-2 list-inside list-disc text-gray-400">
-            {feedback.improvements.map((item, i) => (
-              <li key={i}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <button
-        onClick={onPracticeAgain}
-        className="mt-2 w-full rounded-full bg-violet-500 px-6 py-3 text-white transition hover:bg-violet-600 sm:w-auto"
-      >
-        Practice again
-      </button>
-    </div>
-  );
-}
 
 function Stat({ label, value }) {
   return (
