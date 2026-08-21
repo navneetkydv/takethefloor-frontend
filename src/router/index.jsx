@@ -6,6 +6,7 @@ import { ProtectedRoute } from './ProtectedRoute.jsx';
 import { LandingPage } from '../pages/landing/LandingPage.jsx';
 import { LoginPage } from '../pages/auth/LoginPage.jsx';
 import { DashboardPage } from '../pages/app/DashboardPage.jsx';
+import { CheckoutPage } from '../pages/checkout/CheckoutPage.jsx';
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -15,6 +16,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <DashboardPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/checkout',
+    element: (
+      <ProtectedRoute>
+        <CheckoutPage />
       </ProtectedRoute>
     ),
   },

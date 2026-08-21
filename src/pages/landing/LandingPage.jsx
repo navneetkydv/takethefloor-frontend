@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import heroImg from "../../assets/hero-bgf.png";
 import navImg from "../../assets/logo.png";
+import PricingComp from "../../components/payments/PricingComp.jsx";
+import { useAuthStore } from '../../store/auth.store.js';
 
 const STEPS = [
   {
@@ -72,32 +74,7 @@ const TRANSCRIPT_PARTS = [
   { t: "quiet pocket", k: "emphasis" },
   { t: " where I actually think." },
 ];
-const BASE_FEATURES = [
-  "Daily impromptu topic",
-  "Analysis on filler words & pauses",
-  "Coaching on clarity, confidence & word choice",
-  "10 bonus recordings + analysis per day",
-];
- 
-const PLANS = [
-  {
-    title: "7-day Impromptu Challenge",
-    tag: "Starter pack",
-    regular: 249,
-    offer: 199,
-    features: BASE_FEATURES,
-    cta: "Start 7-day challenge",
-  },
-  {
-    title: "14-day Impromptu Challenge",
-    tag: "For the committed",
-    regular: 449,
-    offer: 349,
-    features: [...BASE_FEATURES, "Deeper, longer practice for more growth"],
-    cta: "Start 14-day challenge",
-    popular: true,
-  },
-];
+
 
 const METRICS = [
   {
@@ -129,7 +106,7 @@ export function LandingPage() {
       <HowItWorks />
       <SpeechCoach />
       <Audiences />
-      <Pricing />
+      <PricingComp />
       <FAQ />
       <FinalCTA />
       <Footer />
@@ -138,12 +115,26 @@ export function LandingPage() {
 }
 
 function Nav() {
+  const user = useAuthStore((s) => s.user);
+
   return (
     <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
       <img src={navImg} alt="TakeTHEfloor" className="h-5 w-auto" />
-      <Link to="/login" className="text-sm text-shadow-gray-600">
-        Sign in
-      </Link>
+      {user ? (
+    <Link
+      to="/app"
+      className="text-sm text-gray-400 transition hover:text-white"
+    >
+      Dashboard →
+    </Link>
+  ) : (
+    <Link
+      to="/login"
+      className="text-sm text-gray-400 transition hover:text-white"
+    >
+      Sign in
+    </Link>
+  )}
     </nav>
   );
 }
@@ -403,108 +394,6 @@ function Audiences() {
   );
 }
 
-function PricingRow({ label, value, variant = "feature" }) {
-  const valueClasses = {
-    feature: "text-xs uppercase tracking-wide text-neutral-400",
-  }[variant];
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-neutral-900/10 py-3 text-sm">
-      <span>{label}</span>
-      <span className={valueClasses}>{value}</span>
-    </div>
-  );
-}
- 
-function PricingCard({
-  title,
-  tag,
-  regular,
-  offer,
-  features,
-  cta,
-  popular,
-}) {
-  const discount = Math.round(((regular - offer) / regular) * 100);
-  return (
-    <div className="relative">
-      {popular && (
-        <span className="absolute -top-3 right-6 z-10 -rotate-3 rounded-sm bg-rose-400 px-3 py-1.5 text-center text-[10px] font-semibold uppercase leading-tight text-rose-950 shadow-sm">
-          Most
-          <br />
-          popular
-        </span>
-      )}
-      <div className="rounded-t-2xl bg-[#F4F1EA] px-6 pt-10 text-neutral-900 sm:px-8">
-        <h3 className="text-center font-serif text-2xl italic leading-snug">
-          {title}
-        </h3>
-        <p className="mt-2 text-center text-xs uppercase tracking-widest text-neutral-500">
-          {tag}
-        </p>
- 
-        <div className="mt-6 flex items-center justify-center gap-2 border-t border-neutral-900/10 pt-6">
-          <span className="text-neutral-400 line-through">₹{regular}</span>
-          <span className="font-serif text-3xl italic font-semibold">
-            ₹{offer}
-          </span>
-        </div>
-        <p className="text-center text-xs text-emerald-700">
-          {discount}% off
-        </p>
- 
-        <div className="mt-6 border-t border-neutral-900/10">
-          {features.map((f) => (
-            <PricingRow key={f} label={f} value="Incl." variant="feature" />
-          ))}
-        </div>
- 
-        <button
-          type="button"
-          className={` mt-6 flex w-full items-center justify-between rounded-full px-6 py-3 text-sm font-medium ${
-            popular
-              ? "bg-amber-400 text-amber-950 hover:bg-amber-300"
-              : "bg-neutral-900 text-white hover:bg-neutral-800"
-          }`}
-        >
-          <span>
-            {cta} — ₹{offer}
-          </span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </div>
-      <div
-        aria-hidden="true"
-        className="h-4"
-        style={{
-          backgroundImage:
-            "linear-gradient(135deg, #F4F1EA 50%, transparent 50.5%), linear-gradient(225deg, #F4F1EA 50%, transparent 50.5%)",
-          backgroundSize: "16px 16px",
-          backgroundPosition: "top",
-          backgroundRepeat: "repeat-x",
-        }}
-      />
-    </div>
-  );
-}
- 
-function Pricing() {
-  return (
-    <section className="mx-auto max-w-4xl px-6 py-16">
-      <h2 className="text-center text-2xl font-semibold sm:text-3xl">
-        Join the{" "}
-        <span className="font-serif italic text-violet-300">challenge</span>
-      </h2>
-      <p className="mx-auto mt-3 max-w-md text-center text-gray-400">
-        Record for 60 seconds. Get AI-powered feedback on exactly what to improve.
-      </p>
-      <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 sm:items-start">
-        {PLANS.map((p) => (
-          <PricingCard key={p.title} {...p} />
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function FAQ() {
   return (

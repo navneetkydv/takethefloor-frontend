@@ -1,18 +1,29 @@
 // src/pages/app/DashboardPage.jsx
+//
+// Paid users go straight to the recorder. Unpaid users see the pitch
+// screen first, then the pricing screen once they click Continue.
+//
+// Entitlement is usually already fetched in the background from main.jsx
+// by the time this mounts, so we only fetch here if nothing's loaded yet
+// (e.g. a hard refresh landing directly on /dashboard). No loading state
+// is shown — the page just renders off whatever isPaid currently is,
+// which flips to true the moment the fetch resolves.
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/auth.store.js';
 import { useEntitlementStore } from '../../store/entitlement.store.js';
 import { RecorderScreen } from '../../components/recorder/RecorderScreen.jsx';
-import { PricingScreen } from '../../components/payments/PricingScreen.jsx';
+import { PitchScreen } from '../../components/payments/PitchScreen.jsx';
+import  PricingScreen  from '../../components/payments/PricingComp.jsx';
 
 export function DashboardPage() {
   const { user, signOut } = useAuthStore();
-  const { isPaid, entitlement, isLoading, fetch: fetchEntitlement } = useEntitlementStore();
+  const { isPaid, entitlement, fetch: fetchEntitlement } = useEntitlementStore();
+  const [unpaidStep, setUnpaidStep] = useState('pitch'); // 'pitch' | 'pricing'
 
   useEffect(() => {
-    fetchEntitlement();
-  }, [fetchEntitlement]);
+    if (!entitlement) fetchEntitlement();
+  }, [entitlement, fetchEntitlement]);
 
   return (
     <main className="min-h-screen bg-neutral-950 p-8 text-white">
@@ -27,11 +38,11 @@ export function DashboardPage() {
         Plan status: {isPaid ? `Paid (${entitlement?.planType})` : 'Not subscribed'}
       </p>
 
-      <div className="mt-8">
-        {isLoading ? (
-          <p className="text-gray-400">Loading...</p>
-        ) : isPaid ? (
+      <div className="mt-8 flex justify-center">
+        {isPaid ? (
           <RecorderScreen />
+        ) : unpaidStep === 'pitch' ? (
+          <PitchScreen onContinue={() => setUnpaidStep('pricing')} />
         ) : (
           <PricingScreen />
         )}

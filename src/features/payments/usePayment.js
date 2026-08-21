@@ -4,25 +4,28 @@
 // Checkout -> verify on success -> refresh the entitlement store so the
 // rest of the app immediately reflects paid status, no reload needed.
 
-import { useState } from 'react';
-import { loadRazorpayScript } from './loadRazorpay.js';
-import { createOrder, verifyPayment } from './payments.api.js';
-import { useEntitlementStore } from '../../store/entitlement.store.js';
-import { useAuthStore } from '../../store/auth.store.js';
+import { useState } from "react";
+import { loadRazorpayScript } from "./loadRazorpay.js";
+import { createOrder, verifyPayment } from "./payments.api.js";
+import { useEntitlementStore } from "../../store/entitlement.store.js";
+import { useAuthStore } from "../../store/auth.store.js";
 
 export function usePayment() {
-  const [status, setStatus] = useState('idle'); // idle | processing | error
+  const [status, setStatus] = useState("idle"); // idle | processing | error
   const [error, setError] = useState(null);
   const fetchEntitlement = useEntitlementStore((s) => s.fetch);
   const user = useAuthStore((s) => s.user);
 
   const pay = async ({ planType, couponCode }) => {
-    setStatus('processing');
+    setStatus("processing");
     setError(null);
 
     try {
       const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) throw new Error('Could not load payment gateway. Check your connection.');
+      if (!scriptLoaded)
+        throw new Error(
+          "Could not load payment gateway. Check your connection.",
+        );
 
       const order = await createOrder({ planType, couponCode });
 
@@ -30,11 +33,21 @@ export function usePayment() {
         const rzp = new window.Razorpay({
           key: order.razorpayKeyId,
           amount: order.amountPaise,
-          currency: 'INR',
+          currency: "INR",
           order_id: order.razorpayOrderId,
-          name: 'Speaking Practice',
-          prefill: { email: user?.email, name: user?.name },
-          theme: { color: '#8b5cf6' }, // violet-500, matches the app accent
+          name: "Speaking Practice",
+          prefill: {
+            email: user?.email,
+            name: user?.name,
+            contact: user?.phone, // only if you actually store this — omit otherwise
+          },
+          readonly: {
+            email: true, // lock it to the logged-in user's email, don't let it be edited
+          },
+          hidden: {
+            contact: !user?.phone, // hide the mobile field when you have nothing to prefill it with
+          },
+          theme: { color: "#8b5cf6" },
           handler: async (response) => {
             try {
               await verifyPayment(response);
@@ -45,20 +58,22 @@ export function usePayment() {
             }
           },
           modal: {
-            ondismiss: () => reject(new Error('Payment cancelled')),
+            ondismiss: () => reject(new Error("Payment cancelled")),
           },
         });
 
-        rzp.on('payment.failed', () => reject(new Error('Payment failed. Please try again.')));
+        rzp.on("payment.failed", () =>
+          reject(new Error("Payment failed. Please try again.")),
+        );
         rzp.open();
       });
 
-      setStatus('idle');
+      setStatus("idle");
       return true;
     } catch (err) {
-      console.error('Payment failed:', err);
-      setStatus('error');
-      setError(err.message || 'Payment failed. Please try again.');
+      console.error("Payment failed:", err);
+      setStatus("error");
+      setError(err.message || "Payment failed. Please try again.");
       return false;
     }
   };

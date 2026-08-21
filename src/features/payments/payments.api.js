@@ -9,3 +9,8 @@ export function createOrder({ planType, couponCode }) {
 export function verifyPayment(razorpayResponse) {
   return api.post('/payments/verify', razorpayResponse);
 }
+
+export function validateCoupon({ code, planType }) {
+  const params = new URLSearchParams({ code, planType });
+  return api.get(`/coupons/validate?${params}`);
+}
