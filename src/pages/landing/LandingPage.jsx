@@ -174,6 +174,7 @@ function Hero({ onTryClick }) { // Add the prop
       >
         <span className="text-black">Try it free →</span>
       </button>
+      <p className="mt-1 text-xs text-gray-500">No login required</p>
       <img
         src={heroImg}
         alt="Speaking challenge"
@@ -431,7 +432,7 @@ function FAQ() {
 function FinalCTA() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-20 text-center">
-      <h2 className="text-3xl font-semibold">Ready to find your voice?</h2>
+      <h2 className="text-3xl font-semibold">Ready to take the floor?</h2>
       <Link
         to="/login"
         className="mt-6 inline-block rounded-full bg-violet-500 px-8 py-4 font-medium hover:bg-violet-600"
