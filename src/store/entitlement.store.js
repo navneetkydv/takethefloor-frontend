@@ -8,7 +8,7 @@ import { create } from 'zustand';
 import { api } from '../lib/api.js';
 
 export const useEntitlementStore = create((set) => ({
-  isPaid: true,
+  isPaid: false,
   entitlement: null, // { planType, paidUntil } | null
   isLoading: false,
 
