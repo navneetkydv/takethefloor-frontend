@@ -445,12 +445,28 @@ function FinalCTA() {
 
 function Footer() {
   return (
-  <footer className="border-t border-white/10 px-6 py-8 flex justify-center items-center">
-  <img
-    src={navImg}
-    alt="GetRiff"
-    className="w-60 sm:w-48 md:w-56 h-auto object-contain"
-  />
-</footer>
+    <footer className="border-t border-white/10 px-6 py-8 flex flex-col justify-center items-center gap-4">
+      <img
+        src={navImg}
+        alt="GetRiff"
+        className="w-48 sm:w-52 md:w-56 h-auto object-contain"
+      />
+
+      <div className="flex items-center gap-6 text-sm text-gray-400">
+        <Link
+          to="/terms"
+          className="hover:text-white text-xs transition-colors"
+        >
+          Terms
+        </Link>
+
+        <Link
+          to="/privacy"
+          className="hover:text-white text-xs transition-colors"
+        >
+          Privacy Policy
+        </Link>
+      </div>
+    </footer>
   );
 }
