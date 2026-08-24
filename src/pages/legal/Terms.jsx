@@ -20,12 +20,12 @@ export function TermsPage() {
 
         <div className="mt-8 space-y-8 text-sm leading-relaxed text-gray-300">
           <Section title="1. Acceptance of terms">
-            By creating an account or using TakeTHEfloor ("the app", "we", "us"), you agree
+            By creating an account or using take up the floor ("the app", "we", "us"), you agree
             to these Terms of Service. If you don't agree, please don't use the app.
           </Section>
 
           <Section title="2. What we offer">
-            TakeTHEfloor is a daily speaking-practice app. You're given a topic, you record
+            Take up the floor is a daily speaking-practice app. You're given a topic, you record
             a short response, and our system evaluates it for clarity, structure, and
             fluency. Access to recording and evaluation depends on your subscription status.
           </Section>
@@ -74,7 +74,8 @@ export function TermsPage() {
           <Section title="10. Contact">
             Questions about these terms? Reach out at{' '}
             <a href="mailto:support@getriff.app" className="underline hover:text-white">
-              support@getriff.app
+              takeupthefloor@gmail.com
+
             </a>
             .
           </Section>

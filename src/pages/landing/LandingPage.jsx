@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import heroImg from "../../assets/hero-bgf.png";
-import navImg from "../../assets/logo.png";
+import navImg from "../../assets/logo-nav.png";
+import footImg from "../../assets/logo.png";
 import PricingComp from "../../components/payments/PricingComp.jsx";
 import { useAuthStore } from '../../store/auth.store.js';
 import { SpinnerHomePreview } from "../../components/recorder/SpinnerHomePreview.jsx";
@@ -132,7 +133,7 @@ function Nav() {
 
   return (
     <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-      <img src={navImg} alt="TakeTHEfloor" className="h-5 w-auto" />
+      <img src={navImg} alt="TakeTHEfloor" className="h-9 w-auto" />
       {user ? (
     <Link
       to="/app"
@@ -447,9 +448,9 @@ function Footer() {
   return (
     <footer className="border-t border-white/10 px-6 py-8 flex flex-col justify-center items-center gap-4">
       <img
-        src={navImg}
+        src={footImg}
         alt="GetRiff"
-        className="w-48 sm:w-52 md:w-56 h-auto object-contain"
+        className="w-50 sm:w-52 md:w-56 h-auto object-contain"
       />
 
       <div className="flex items-center gap-6 text-sm text-gray-400">
