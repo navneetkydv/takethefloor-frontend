@@ -91,8 +91,8 @@ export function CheckoutPage() {
         <img src={checkoutImg} alt="" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-neutral-950/10" />
         <div className="absolute inset-x-0 bottom-0 p-10 xl:p-14">
-          <p className="font-serif text-3xl italic leading-tight text-violet-200 xl:text-4xl">
-            Become dangerously articulate.
+          <p className="font-serif text-2xl italic leading-tight text-violet-200 xl:text-4xl">
+             dangerously articulate.
           </p>
           <div className="mt-8 flex gap-10">
             <BrandStat value="10K+" label="Daily reps logged" />

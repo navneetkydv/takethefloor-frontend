@@ -155,7 +155,7 @@ function Nav() {
 function Hero({ onTryClick }) { // Add the prop
   return (
     <section className="mx-auto flex max-w-7xl flex-col items-center px-6 py-12 text-center">
-      <h1 className="p-2 text-4xl font-bold text-zinc-200 sm:text-5xl">
+      <h1 className="p-2 text-3xl font-bold text-zinc-200 sm:text-5xl">
         <span className="bg-amber-50 bg-clip-text text-transparent">
           Become dangerously
         </span>{" "}

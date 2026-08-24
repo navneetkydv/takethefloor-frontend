@@ -29,19 +29,26 @@ export function DashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 p-8 text-white">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Welcome, {user?.name || user?.email}</h1>
-        <button onClick={signOut} className="text-sm text-gray-400 hover:text-white hover:underline">
-          Sign out
-        </button>
+    <main className="min-h-screen bg-neutral-950 py-5 text-white sm:py-8">
+      <div className="px-4 sm:px-8">
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="min-w-0 truncate text-lg font-semibold sm:text-2xl">
+            Welcome, {user?.name || user?.email}
+          </h1>
+          <button
+            onClick={signOut}
+            className="shrink-0 text-sm text-gray-400 hover:text-white hover:underline"
+          >
+            Sign out
+          </button>
+        </div>
+
+        <p className="mt-1.5 text-sm text-gray-500">
+          Plan status: {isPaid ? `Paid (${entitlement?.planType})` : 'Not subscribed'}
+        </p>
       </div>
 
-      <p className="mt-2 text-sm text-gray-500">
-        Plan status: {isPaid ? `Paid (${entitlement?.planType})` : 'Not subscribed'}
-      </p>
-
-      <div className="mt-8 flex justify-center">
+      <div className="mt-6 flex justify-center sm:mt-8">
         {!hasFetched ? (
           <p className="text-gray-400">Loading...</p>
         ) : isPaid ? (
