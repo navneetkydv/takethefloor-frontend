@@ -15,6 +15,46 @@ function pickMimeType() {
   return candidates.find((type) => MediaRecorder.isTypeSupported(type)) || '';
 }
 
+// Common in-app browsers (WhatsApp, Instagram, Facebook, Messenger, Line)
+// frequently block getUserMedia entirely — the call rejects before any
+// native permission prompt can appear. This is a best-effort UA sniff, not
+// a guarantee, but it lets us give a much more actionable error than a
+// generic "allow microphone access" message when it's really "you're not
+// in a real browser."
+function isLikelyInAppBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /FBAN|FBAV|Instagram|WhatsApp|Line\//i.test(ua);
+}
+
+function describeGetUserMediaError(err) {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    return isLikelyInAppBrowser()
+      ? "Recording isn't supported in this in-app browser. Tap the menu and choose \"Open in Chrome\" (or Safari), then try again."
+      : "This browser doesn't support recording. Try Chrome or Safari.";
+  }
+
+  switch (err?.name) {
+    case 'NotAllowedError':
+    case 'PermissionDeniedError':
+      return isLikelyInAppBrowser()
+        ? "This app's built-in browser blocked microphone access. Tap the menu and choose \"Open in Chrome\" (or Safari), then try again."
+        : 'Microphone access was denied. Enable it in your browser\'s site settings, then try again.';
+    case 'NotFoundError':
+    case 'DevicesNotFoundError':
+      return 'No microphone was found on this device.';
+    case 'NotReadableError':
+    case 'TrackStartError':
+      return 'Your microphone is being used by another app. Close it and try again.';
+    case 'SecurityError':
+      return 'This page needs to be loaded securely (https) to use the microphone.';
+    case 'AbortError':
+      return 'Recording was interrupted before it could start. Please try again.';
+    default:
+      return 'Microphone access is required to record. Please allow it and try again.';
+  }
+}
+
 export function useRecorder() {
   const [status, setStatus] = useState('idle'); // idle | recording | stopped
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -44,6 +84,11 @@ export function useRecorder() {
     setMaxSeconds(DEFAULT_MAX_SECONDS);
     setExtendCount(0);
     chunksRef.current = [];
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError(describeGetUserMediaError(null));
+      return;
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -76,8 +121,8 @@ export function useRecorder() {
         });
       }, 1000);
     } catch (err) {
-      console.error('Failed to start recording:', err);
-      setError('Microphone access is required to record. Please allow it and try again.');
+      console.error('Failed to start recording:', err?.name, err);
+      setError(describeGetUserMediaError(err));
     }
   }, []);
 
