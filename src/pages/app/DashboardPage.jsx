@@ -1,16 +1,21 @@
 // src/pages/app/DashboardPage.jsx
 
-import { useEffect, useState } from 'react';
-import { useAuthStore } from '../../store/auth.store.js';
-import { useEntitlementStore } from '../../store/entitlement.store.js';
-import { RecorderScreen } from '../../components/recorder/RecorderScreen.jsx';
-import { PitchScreen } from '../../components/payments/PitchScreen.jsx';
-import  PricingScreen  from '../../components/payments/PricingComp.jsx';
+import { useEffect, useState } from "react";
+import { useAuthStore } from "../../store/auth.store.js";
+import { useEntitlementStore } from "../../store/entitlement.store.js";
+import { RecorderScreen } from "../../components/recorder/RecorderScreen.jsx";
+import { PitchScreen } from "../../components/payments/PitchScreen.jsx";
+import PricingScreen from "../../components/payments/PricingComp.jsx";
 
 export function DashboardPage() {
   const { user, signOut } = useAuthStore();
-  const { isPaid, entitlement, hasFetched, fetch: fetchEntitlement } = useEntitlementStore();
-  const [unpaidStep, setUnpaidStep] = useState('pitch'); // 'pitch' | 'pricing'
+  const {
+    isPaid,
+    entitlement,
+    hasFetched,
+    fetch: fetchEntitlement,
+  } = useEntitlementStore();
+  const [unpaidStep, setUnpaidStep] = useState("pitch"); // 'pitch' | 'pricing'
 
   useEffect(() => {
     if (!hasFetched) fetchEntitlement();
@@ -22,10 +27,11 @@ export function DashboardPage() {
     // flight, or they paid in another tab). If they're actually paid,
     // isPaid flips via the store subscription and this component
     // re-renders straight to RecorderScreen — no need to touch unpaidStep.
-    await fetchEntitlement();
-    if (!useEntitlementStore.getState().isPaid) {
-      setUnpaidStep('pricing');
-    }
+    // await fetchEntitlement();
+    // if (!useEntitlementStore.getState().hasFetched) {
+    //   setUnpaidStep('pricing');
+    // }
+    setUnpaidStep("pricing");
   };
 
   return (
@@ -44,16 +50,17 @@ export function DashboardPage() {
         </div>
 
         <p className="mt-1.5 text-sm text-gray-500">
-          Plan status: {isPaid ? `Paid (${entitlement?.planType})` : 'Not subscribed'}
+          Plan status:{" "}
+          {isPaid ? `Paid (${entitlement?.planType})` : "Not subscribed"}
         </p>
       </div>
 
       <div className="mt-6 flex justify-center sm:mt-8">
         {!hasFetched ? (
-          <p className="text-gray-400">Loading...</p>
+          <p className="text-gray-400">Preparing your dashboard…...</p>
         ) : isPaid ? (
           <RecorderScreen />
-        ) : unpaidStep === 'pitch' ? (
+        ) : unpaidStep === "pitch" ? (
           <PitchScreen onContinue={handlePitchContinue} />
         ) : (
           <PricingScreen />

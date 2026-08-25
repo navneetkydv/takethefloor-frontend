@@ -71,7 +71,7 @@ export function PrivacyPage() {
           <Section title="9. Contact">
             Questions about your data? Reach out at{' '}
             <a href="mailto:support@getriff.app" className="underline hover:text-white">
-              support@getriff.app
+              takeupthefloor@gmail.com
             </a>
             .
           </Section>
