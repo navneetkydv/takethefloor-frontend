@@ -12,6 +12,7 @@ import { uploadRecording } from '../../features/recordings/recordings.api.js';
 import { CategoryPicker } from './CategoryPicker.jsx';
 import { TopicSpinner } from './TopicSpinner.jsx';
 import { CircularTimer } from './CircularTimer.jsx';
+import { ResultView } from '../result/ResultView.jsx';
 
 export function RecorderScreen() {
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -158,52 +159,3 @@ export function RecorderScreen() {
   );
 }
 
-function ResultView({ result, onPracticeAgain }) {
-  const feedback = result.llmFeedback;
-
-  return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6 text-white sm:px-6 sm:py-8">
-      <h2 className="text-xl font-semibold">Your results</h2>
-
-      <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-        <Stat label="Overall" value={feedback?.overallScore} />
-        <Stat label="Clarity" value={feedback?.clarityScore} />
-        <Stat label="Structure" value={feedback?.structureScore} />
-        <Stat label="Fluency" value={feedback?.fluencyScore} />
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-gray-300">
-        {result.wpm} WPM · {result.pauseCount} long pauses · {result.fillerWordCount} filler words
-      </div>
-
-      {feedback?.summary && <p className="text-gray-300">{feedback.summary}</p>}
-
-      {feedback?.improvements?.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <p className="font-medium">To improve:</p>
-          <ul className="mt-2 list-inside list-disc text-gray-400">
-            {feedback.improvements.map((item, i) => (
-              <li key={i}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <button
-        onClick={onPracticeAgain}
-        className="mt-2 w-full rounded-full bg-violet-500 px-6 py-3 text-white transition hover:bg-violet-600 sm:w-auto"
-      >
-        Practice again
-      </button>
-    </div>
-  );
-}
-
-function Stat({ label, value }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-      <p className="text-2xl font-semibold text-white">{value ?? '–'}</p>
-      <p className="text-xs text-gray-400">{label}</p>
-    </div>
-  );
-}

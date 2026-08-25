@@ -39,13 +39,13 @@ export function usePayment() {
           prefill: {
             email: user?.email,
             name: user?.name,
-            contact: user?.phone, // only if you actually store this — omit otherwise
+            // only if you actually store this — omit otherwise
           },
           readonly: {
             email: true, // lock it to the logged-in user's email, don't let it be edited
           },
           hidden: {
-            contact: !user?.phone, // hide the mobile field when you have nothing to prefill it with
+            contact: true, // This will now work
           },
           theme: { color: "#8b5cf6" },
           handler: async (response) => {

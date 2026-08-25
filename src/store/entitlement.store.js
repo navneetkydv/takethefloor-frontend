@@ -11,17 +11,20 @@ export const useEntitlementStore = create((set) => ({
   isPaid: false,
   entitlement: null, // { planType, paidUntil } | null
   isLoading: false,
+  hasFetched: false, // false until the first check completes — needed
+                      // because isPaid:false alone can't tell "not
+                      // checked yet" from "confirmed unpaid"
 
   fetch: async () => {
     set({ isLoading: true });
     try {
       const { isPaid, entitlement } = await api.get('/payments/entitlement');
-      set({ isPaid, entitlement, isLoading: false });
+      set({ isPaid, entitlement, isLoading: false, hasFetched: true });
     } catch (err) {
       console.error('Failed to fetch entitlement:', err);
-      set({ isLoading: false });
+      set({ isLoading: false, hasFetched: true });
     }
   },
 
-  reset: () => set({ isPaid: false, entitlement: null }),
+  reset: () => set({ isPaid: false, entitlement: null, hasFetched: false }),
 }));

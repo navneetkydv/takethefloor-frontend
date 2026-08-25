@@ -93,23 +93,27 @@ export function TopicSpinner({ selectedCategories = [], onSelect, disabled = fal
             transitionDuration: instant ? '0ms' : `${SPIN_DURATION}ms`,
           }}
         >
-          {reel.map((t, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-center px-6 text-center"
-              style={{ height: ITEM_HEIGHT }}
-            >
-              <span
-                className={`line-clamp-2 text-sm font-medium leading-snug transition-colors sm:text-base ${
-                  i === LANDING_INDEX && phase === 'landed'
-                    ? 'text-white'
-                    : 'text-gray-400'
+          {reel.map((t, i) => {
+            const isLanding = i === LANDING_INDEX;
+            const dimmed = phase === 'landed' && !isLanding;
+            return (
+              <div
+                key={i}
+                className={`flex items-center justify-center px-6 text-center transition-opacity duration-500 ${
+                  dimmed ? 'opacity-20' : 'opacity-100'
                 }`}
+                style={{ height: ITEM_HEIGHT }}
               >
-                {t.text}
-              </span>
-            </div>
-          ))}
+                <span
+                  className={`line-clamp-2 text-sm font-medium leading-snug transition-colors duration-500 sm:text-base ${
+                    isLanding && phase === 'landed' ? 'text-white' : 'text-gray-400'
+                  }`}
+                >
+                  {t.text}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

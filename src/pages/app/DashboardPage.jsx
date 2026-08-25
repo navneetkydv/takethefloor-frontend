@@ -1,13 +1,4 @@
 // src/pages/app/DashboardPage.jsx
-//
-// Paid users go straight to the recorder. Unpaid users see the pitch
-// screen first, then the pricing screen once they click Continue.
-//
-// Entitlement is usually already fetched in the background from main.jsx
-// by the time this mounts, so we only fetch here if nothing's loaded yet
-// (e.g. a hard refresh landing directly on /dashboard). No loading state
-// is shown — the page just renders off whatever isPaid currently is,
-// which flips to true the moment the fetch resolves.
 
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/auth.store.js';
@@ -18,31 +9,52 @@ import  PricingScreen  from '../../components/payments/PricingComp.jsx';
 
 export function DashboardPage() {
   const { user, signOut } = useAuthStore();
-  const { isPaid, entitlement, fetch: fetchEntitlement } = useEntitlementStore();
+  const { isPaid, entitlement, hasFetched, fetch: fetchEntitlement } = useEntitlementStore();
   const [unpaidStep, setUnpaidStep] = useState('pitch'); // 'pitch' | 'pricing'
 
   useEffect(() => {
-    if (!entitlement) fetchEntitlement();
-  }, [entitlement, fetchEntitlement]);
+    if (!hasFetched) fetchEntitlement();
+  }, [hasFetched, fetchEntitlement]);
+
+  const handlePitchContinue = async () => {
+    // Re-check fresh entitlement right at the click — don't trust whatever
+    // isPaid was when PitchScreen last rendered (e.g. fetch was still in
+    // flight, or they paid in another tab). If they're actually paid,
+    // isPaid flips via the store subscription and this component
+    // re-renders straight to RecorderScreen — no need to touch unpaidStep.
+    await fetchEntitlement();
+    if (!useEntitlementStore.getState().isPaid) {
+      setUnpaidStep('pricing');
+    }
+  };
 
   return (
-    <main className="min-h-screen bg-neutral-950 p-8 text-white">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Welcome, {user?.name || user?.email}</h1>
-        <button onClick={signOut} className="text-sm text-gray-400 hover:text-white hover:underline">
-          Sign out
-        </button>
+    <main className="min-h-screen bg-neutral-950 py-5 text-white sm:py-8">
+      <div className="px-4 sm:px-8">
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="min-w-0 truncate text-lg font-semibold sm:text-2xl">
+            Welcome, {user?.name || user?.email}
+          </h1>
+          <button
+            onClick={signOut}
+            className="shrink-0 text-sm text-gray-400 hover:text-white hover:underline"
+          >
+            Sign out
+          </button>
+        </div>
+
+        <p className="mt-1.5 text-sm text-gray-500">
+          Plan status: {isPaid ? `Paid (${entitlement?.planType})` : 'Not subscribed'}
+        </p>
       </div>
 
-      <p className="mt-2 text-sm text-gray-500">
-        Plan status: {isPaid ? `Paid (${entitlement?.planType})` : 'Not subscribed'}
-      </p>
-
-      <div className="mt-8 flex justify-center">
-        {isPaid ? (
+      <div className="mt-6 flex justify-center sm:mt-8">
+        {!hasFetched ? (
+          <p className="text-gray-400">Loading...</p>
+        ) : isPaid ? (
           <RecorderScreen />
         ) : unpaidStep === 'pitch' ? (
-          <PitchScreen onContinue={() => setUnpaidStep('pricing')} />
+          <PitchScreen onContinue={handlePitchContinue} />
         ) : (
           <PricingScreen />
         )}
