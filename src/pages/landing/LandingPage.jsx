@@ -449,8 +449,8 @@ function Footer() {
     <footer className="border-t border-white/10 px-6 py-8 flex flex-col justify-center items-center gap-4">
       <img
         src={footImg}
-        alt="GetRiff"
-        className="w-50 sm:w-52 md:w-56 h-auto object-contain"
+        alt="take up the floor"
+        className="w-90 sm:w-52 md:w-90 h-auto object-contain"
       />
 
       <div className="flex items-center gap-6 text-sm text-gray-400">

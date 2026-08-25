@@ -1,11 +1,19 @@
 // src/pages/auth/LoginPage.jsx
 
+import { useState } from 'react';
 import { Navigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth.store.js';
 
 export function LoginPage() {
-  const { user, isInitialized, signInWithGoogle } = useAuthStore();
+  const { user, isInitialized, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuthStore();
   const [searchParams] = useSearchParams();
+
+  const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [formError, setFormError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [checkEmail, setCheckEmail] = useState(false);
 
   const next = searchParams.get('next');
   const plan = searchParams.get('plan');
@@ -15,9 +23,34 @@ export function LoginPage() {
     return <Navigate to={redirectTo} replace />;
   }
 
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    setFormError(null);
+    setSubmitting(true);
+
+    const result =
+      mode === 'signin'
+        ? await signInWithEmail(email, password)
+        : await signUpWithEmail(email, password);
+
+    setSubmitting(false);
+
+    if (result.error) {
+      setFormError(result.error.message);
+      return;
+    }
+
+    // Sign-up with email confirmation enabled: no session yet, nothing to
+    // redirect to — tell them to check their inbox instead.
+    if (mode === 'signup' && !result.data.session) {
+      setCheckEmail(true);
+    }
+    // Otherwise the store's `user` updates and the <Navigate> above fires
+    // on the next render.
+  };
+
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-neutral-950 px-6 text-white">
-      {/* soft ambient glow, matches the rest of the site's dark aesthetic */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/20 blur-[120px]"
         aria-hidden="true"
@@ -31,13 +64,74 @@ export function LoginPage() {
           Sign in to keep building your speaking streak.
         </p>
 
-        <button
-          onClick={signInWithGoogle}
-          className="mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-white px-6 py-3 font-medium text-neutral-900 transition hover:bg-gray-100"
-        >
-          <GoogleIcon className="h-5 w-5" />
-          Continue with Google
-        </button>
+        {checkEmail ? (
+          <p className="mt-8 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-gray-300">
+            Check <span className="text-white">{email}</span> for a confirmation link to finish
+            creating your account.
+          </p>
+        ) : (
+          <>
+            <button
+              onClick={signInWithGoogle}
+              className="mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-white px-6 py-3 font-medium text-neutral-900 transition hover:bg-gray-100"
+            >
+              <GoogleIcon className="h-5 w-5" />
+              Continue with Google
+            </button>
+
+            <div className="mt-6 flex items-center gap-3 text-xs text-gray-500">
+              <div className="h-px flex-1 bg-white/10" />
+              or
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+
+            <form onSubmit={handleEmailSubmit} className="mt-6 flex flex-col gap-3 text-left">
+              <input
+                type="email"
+                required
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm placeholder:text-gray-500 focus:border-violet-400 focus:outline-none"
+              />
+              <input
+                type="password"
+                required
+                minLength={6}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm placeholder:text-gray-500 focus:border-violet-400 focus:outline-none"
+              />
+
+              {formError && <p className="text-sm text-red-400">{formError}</p>}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="mt-1 w-full rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+              >
+                {submitting
+                  ? 'Please wait…'
+                  : mode === 'signin'
+                    ? 'Sign in'
+                    : 'Create account'}
+              </button>
+            </form>
+
+            <button
+              onClick={() => {
+                setMode((m) => (m === 'signin' ? 'signup' : 'signin'));
+                setFormError(null);
+              }}
+              className="mt-4 text-xs text-gray-500 hover:text-gray-300"
+            >
+              {mode === 'signin'
+                ? "Don't have an account? Sign up"
+                : 'Already have an account? Sign in'}
+            </button>
+          </>
+        )}
 
         <p className="mt-6 text-xs text-gray-500">
           By continuing you agree to our{' '}

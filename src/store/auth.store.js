@@ -38,6 +38,30 @@ export const useAuthStore = create((set, get) => ({
     // redirect back, at which point onAuthStateChange (above) fires.
   },
 
+  // Returns { data, error } so the caller (a form) can show the error
+  // inline — unlike OAuth, this can fail synchronously (weak password,
+  // email already registered) with no redirect to fall back on.
+  signUpWithEmail: async (email, password) => {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return { error };
+
+    // If email confirmation is required in your Supabase project settings,
+    // signUp succeeds but data.session is null until the link is clicked —
+    // don't treat the user as signed in yet in that case.
+    if (data.session) {
+      set({ session: data.session, user: mapSupabaseUser(data.user) });
+    }
+    return { data };
+  },
+
+  signInWithEmail: async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error };
+
+    set({ session: data.session, user: mapSupabaseUser(data.user) });
+    return { data };
+  },
+
   signOut: async () => {
     await supabase.auth.signOut();
     set({ session: null, user: null });
