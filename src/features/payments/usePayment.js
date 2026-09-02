@@ -35,7 +35,7 @@ export function usePayment() {
           amount: order.amountPaise,
           currency: "INR",
           order_id: order.razorpayOrderId,
-          name: "Take the Floor",
+          name: "take up the floor",
           prefill: {
             email: user?.email,
             name: user?.name,

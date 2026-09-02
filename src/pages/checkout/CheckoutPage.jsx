@@ -39,7 +39,7 @@ export function CheckoutPage() {
     return () => clearTimeout(timer);
   }, [couponError]);
 
-  if (!plan) {
+  if (!plan) {fa
     return (
       <main className="flex min-h-screen items-center justify-center bg-neutral-950 text-white">
         <p>
