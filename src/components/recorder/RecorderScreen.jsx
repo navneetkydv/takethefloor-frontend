@@ -1,10 +1,10 @@
 // src/components/recorder/RecorderScreen.jsx
 //
 // Full recording flow: pick a category (optional) -> spin a topic on a
-// scrolling reel -> record -> preview/re-record -> submit -> processing
-// state -> evaluation result. Handles 402 (unpaid) and 429 (daily limit)
-// errors from the backend with specific messaging rather than a generic
-// failure.
+// scrolling reel, or write your own -> record -> preview/re-record ->
+// submit -> processing state -> evaluation result. Handles 402 (unpaid)
+// and 429 (daily limit) errors from the backend with specific messaging
+// rather than a generic failure.
 
 import { useState } from 'react';
 import { useRecorder } from '../../features/recordings/useRecorder.js';
@@ -15,7 +15,9 @@ import { CircularTimer } from './CircularTimer.jsx';
 import { ResultView } from '../result/ResultView.jsx';
 
 export function RecorderScreen() {
+  const [topicMode, setTopicMode] = useState('spin'); // 'spin' | 'custom'
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [customTopic, setCustomTopic] = useState('');
   const [topic, setTopic] = useState(null);
   const [submitState, setSubmitState] = useState('idle'); // idle | uploading | done | error
   const [result, setResult] = useState(null);
@@ -43,6 +45,18 @@ export function RecorderScreen() {
     );
   };
 
+  const toggleTopicMode = () => {
+    setTopicMode((m) => (m === 'spin' ? 'custom' : 'spin'));
+    setTopic(null);
+    setCustomTopic('');
+  };
+
+  const handleCustomTopicChange = (e) => {
+    const value = e.target.value;
+    setCustomTopic(value);
+    setTopic(value.trim() ? value.trim() : null);
+  };
+
   const handleSubmit = async () => {
     setSubmitState('uploading');
     setSubmitError(null);
@@ -68,6 +82,7 @@ export function RecorderScreen() {
     setResult(null);
     setSubmitError(null);
     setTopic(null);
+    setCustomTopic('');
   };
 
   if (submitState === 'done' && result) {
@@ -78,8 +93,31 @@ export function RecorderScreen() {
     <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 py-6 sm:px-6 sm:py-8">
       {status === 'idle' && (
         <div className="flex w-full flex-col items-center gap-6">
-          <CategoryPicker selected={selectedCategories} onToggle={toggleCategory} />
-          <TopicSpinner selectedCategories={selectedCategories} onSelect={setTopic} disabled={false} />
+          {topicMode === 'spin' ? (
+            <>
+              <CategoryPicker selected={selectedCategories} onToggle={toggleCategory} />
+              <TopicSpinner selectedCategories={selectedCategories} onSelect={setTopic} disabled={false} />
+            </>
+          ) : (
+            <div className="w-full max-w-3xl">
+              <textarea
+                value={customTopic}
+                onChange={handleCustomTopicChange}
+                placeholder="Type the topic you want to speak about…"
+                rows={3}
+                autoFocus
+                className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base text-white placeholder:text-gray-500 focus:border-violet-400 focus:outline-none"
+              />
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={toggleTopicMode}
+            className="text-sm text-gray-400 underline-offset-2 hover:text-white hover:underline"
+          >
+            {topicMode === 'spin' ? 'Or write your own topic' : '← Back to spin a topic'}
+          </button>
         </div>
       )}
 
@@ -158,4 +196,3 @@ export function RecorderScreen() {
     </div>
   );
 }
-

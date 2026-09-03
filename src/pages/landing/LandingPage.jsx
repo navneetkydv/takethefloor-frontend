@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useRef } from "react";
 import heroImg from "../../assets/hero-bgf.png";
-import navImg from "../../assets/logo.png";
+import navImg from "../../assets/logo-nav.png";
+import footImg from "../../assets/logo.png";
 import PricingComp from "../../components/payments/PricingComp.jsx";
-import { useAuthStore } from '../../store/auth.store.js';
+import { useAuthStore } from "../../store/auth.store.js";
 import { SpinnerHomePreview } from "../../components/recorder/SpinnerHomePreview.jsx";
-
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const STEPS = [
   {
     title: "Spin a topic",
@@ -77,7 +79,6 @@ const TRANSCRIPT_PARTS = [
   { t: " where I actually think." },
 ];
 
-
 const METRICS = [
   {
     label: "Clarity",
@@ -101,21 +102,22 @@ const METRICS = [
 ];
 
 export function LandingPage() {
-   const spinnerRef = useRef(null); // Add this
+  const spinnerRef = useRef(null); // Add this
 
-  const scrollToSpinner = () => { // Add this
-    spinnerRef.current?.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
+  const scrollToSpinner = () => {
+    // Add this
+    spinnerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
     });
   };
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       <Nav />
-      <Hero onTryClick={scrollToSpinner}/>
+      <Hero onTryClick={scrollToSpinner} />
       <HowItWorks />
-      <div ref={spinnerRef} id="try-spinner"> 
-      <SpinnerHomePreview/>
+      <div ref={spinnerRef} id="try-spinner">
+        <SpinnerHomePreview />
       </div>
       <SpeechCoach />
       <Audiences />
@@ -132,30 +134,31 @@ function Nav() {
 
   return (
     <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-      <img src={navImg} alt="TakeTHEfloor" className="h-5 w-auto" />
+      <img src={navImg} alt="TakeTHEfloor" className="h-9 w-auto" />
       {user ? (
-    <Link
-      to="/app"
-      className="text-sm text-gray-400 transition hover:text-white"
-    >
-      Dashboard →
-    </Link>
-  ) : (
-    <Link
-      to="/login"
-      className="text-sm text-gray-400 transition hover:text-white"
-    >
-      Sign in
-    </Link>
-  )}
+        <Link
+          to="/app"
+          className="text-sm text-gray-400 transition hover:text-white"
+        >
+          Dashboard →
+        </Link>
+      ) : (
+        <Link
+          to="/login"
+          className="text-sm text-gray-400 transition hover:text-white"
+        >
+          Sign in
+        </Link>
+      )}
     </nav>
   );
 }
 
-function Hero({ onTryClick }) { // Add the prop
+function Hero({ onTryClick }) {
+  // Add the prop
   return (
     <section className="mx-auto flex max-w-7xl flex-col items-center px-6 py-12 text-center">
-      <h1 className="p-2 text-4xl font-bold text-zinc-200 sm:text-5xl">
+      <h1 className="p-2 text-3xl font-bold text-zinc-200 sm:text-5xl">
         <span className="bg-amber-50 bg-clip-text text-transparent">
           Become dangerously
         </span>{" "}
@@ -174,6 +177,7 @@ function Hero({ onTryClick }) { // Add the prop
       >
         <span className="text-black">Try it free →</span>
       </button>
+      <p className="mt-1 text-xs text-gray-500">No login required</p>
       <img
         src={heroImg}
         alt="Speaking challenge"
@@ -182,7 +186,6 @@ function Hero({ onTryClick }) { // Add the prop
     </section>
   );
 }
-
 
 /* ---------- How it works: preview visuals ---------- */
 
@@ -264,7 +267,12 @@ function StreakPreview() {
   );
 }
 
-const PREVIEWS = [TopicPreview, WaveformPreview, FeedbackPreview, StreakPreview];
+const PREVIEWS = [
+  TopicPreview,
+  WaveformPreview,
+  FeedbackPreview,
+  StreakPreview,
+];
 
 function HowItWorks() {
   return (
@@ -408,7 +416,6 @@ function Audiences() {
   );
 }
 
-
 function FAQ() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-16">
@@ -431,7 +438,7 @@ function FAQ() {
 function FinalCTA() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-20 text-center">
-      <h2 className="text-3xl font-semibold">Ready to find your voice?</h2>
+      <h2 className="text-3xl font-semibold">Ready to take the floor?</h2>
       <Link
         to="/login"
         className="mt-6 inline-block rounded-full bg-violet-500 px-8 py-4 font-medium hover:bg-violet-600"
@@ -443,13 +450,72 @@ function FinalCTA() {
 }
 
 function Footer() {
+  const [backendStatus, setBackendStatus] = useState("checking"); // checking | up | down
+
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/health`, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setBackendStatus(data?.ok ? "up" : "down");
+        } else {
+          setBackendStatus("down");
+        }
+      } catch (err) {
+        setBackendStatus("down");
+      }
+    };
+
+    checkBackend();
+    const interval = setInterval(checkBackend, 60000); // recheck every 60s
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-  <footer className="border-t border-white/10 px-6 py-8 flex justify-center items-center">
-  <img
-    src={navImg}
-    alt="GetRiff"
-    className="w-60 sm:w-48 md:w-56 h-auto object-contain"
-  />
-</footer>
+    <footer className="border-t border-white/10 px-6 py-8 flex flex-col justify-center items-center gap-4">
+      <img
+        src={footImg}
+        alt="take up the floor"
+        className="w-90 sm:w-52 md:w-90 h-auto object-contain"
+      />
+
+      <div className="flex items-center gap-6 text-sm text-gray-400">
+        <Link
+          to="/terms"
+          className="hover:text-white text-xs transition-colors"
+        >
+          Terms
+        </Link>
+        <Link
+          to="/privacy"
+          className="hover:text-white text-xs transition-colors"
+        >
+          Privacy Policy
+        </Link>
+      </div>
+
+      {/* Backend Status Indicator */}
+      <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+        <span
+          className={`w-2 h-2 rounded-full ${
+            backendStatus === "up"
+              ? "bg-green-500"
+              : backendStatus === "down"
+                ? "bg-red-500"
+                : "bg-yellow-500 animate-pulse"
+          }`}
+        />
+        <span>
+          {backendStatus === "up" && "You're good to go"}
+          {backendStatus === "down" && "Temporarily unavailable"}
+          {backendStatus === "checking" && "Connecting..."}
+        </span>
+      </div>
+    </footer>
   );
 }
