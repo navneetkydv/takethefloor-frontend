@@ -1,10 +1,11 @@
 // src/components/recorder/RecorderScreen.jsx
 //
-// Full recording flow: pick a category (optional) -> spin a topic on a
-// scrolling reel, or write your own -> record -> preview/re-record ->
-// submit -> processing state -> evaluation result. Handles 402 (unpaid)
-// and 429 (daily limit) errors from the backend with specific messaging
-// rather than a generic failure.
+// Full recording flow: pick a collection (Everyday / Thoughtful) and
+// optionally a category -> spin a topic on a scrolling reel, or write
+// your own -> record -> preview/re-record -> submit -> processing state
+// -> evaluation result. Handles 402 (unpaid) and 429 (daily limit)
+// errors from the backend with specific messaging rather than a generic
+// failure.
 
 import { useState } from 'react';
 import { useRecorder } from '../../features/recordings/useRecorder.js';
@@ -13,9 +14,16 @@ import { CategoryPicker } from './CategoryPicker.jsx';
 import { TopicSpinner } from './TopicSpinner.jsx';
 import { CircularTimer } from './CircularTimer.jsx';
 import { ResultView } from '../result/ResultView.jsx';
+import { getCategoriesForCollection } from '../../features/recordings/topics.data.js';
+
+const COLLECTIONS = [
+  { value: 'everyday', label: 'Everyday' },
+  { value: 'thoughtful', label: 'Thoughtful' },
+];
 
 export function RecorderScreen() {
   const [topicMode, setTopicMode] = useState('spin'); // 'spin' | 'custom'
+  const [topicCollection, setTopicCollection] = useState('everyday'); // 'everyday' | 'thoughtful'
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [customTopic, setCustomTopic] = useState('');
   const [topic, setTopic] = useState(null);
@@ -38,6 +46,15 @@ export function RecorderScreen() {
     cancel,
     reset,
   } = useRecorder();
+
+  const categories = getCategoriesForCollection(topicCollection);
+
+  const handleCollectionChange = (value) => {
+    if (value === topicCollection) return;
+    setTopicCollection(value);
+    setSelectedCategories([]); // category list differs per collection — don't carry a stale selection over
+    setTopic(null);
+  };
 
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
@@ -93,10 +110,41 @@ export function RecorderScreen() {
     <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4 py-6 sm:px-6 sm:py-8">
       {status === 'idle' && (
         <div className="flex w-full flex-col items-center gap-6">
+          {topicMode === 'spin' && (
+            <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+              {COLLECTIONS.map(({ value, label }) => {
+                const isActive = topicCollection === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => handleCollectionChange(value)}
+                    className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-violet-500 text-white'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {topicMode === 'spin' ? (
             <>
-              <CategoryPicker selected={selectedCategories} onToggle={toggleCategory} />
-              <TopicSpinner selectedCategories={selectedCategories} onSelect={setTopic} disabled={false} />
+              <CategoryPicker
+                categories={categories}
+                selected={selectedCategories}
+                onToggle={toggleCategory}
+              />
+              <TopicSpinner
+                collection={topicCollection}
+                selectedCategories={selectedCategories}
+                onSelect={setTopic}
+                disabled={false}
+              />
             </>
           ) : (
             <div className="w-full max-w-3xl">

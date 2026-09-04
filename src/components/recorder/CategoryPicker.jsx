@@ -1,21 +1,23 @@
 // src/components/recorder/CategoryPicker.jsx
 //
-// Toggleable category pills. No selection = spin from all categories.
+// Toggleable category pills. No selection = spin from all categories
+// within the current collection. `categories` is passed in by the
+// parent (it varies by collection — everyday/thoughtful), rather than
+// importing a single fixed list. Split into rows of 6, each row
+// independently centered — so a partial last row centers on its own
+// items instead of trailing off to one side.
 
-import { CATEGORIES } from '../../features/recordings/topics.data.js';
-
-export function CategoryPicker({ selected, onToggle }) {
-  // Split categories into rows of 6
+export function CategoryPicker({ categories, selected, onToggle }) {
   const rows = [];
-  for (let i = 0; i < CATEGORIES.length; i += 6) {
-    rows.push(CATEGORIES.slice(i, i + 6));
+  for (let i = 0; i < categories.length; i += 6) {
+    rows.push(categories.slice(i, i + 6));
   }
 
   return (
     <div className="flex flex-col items-center gap-2">
       {rows.map((row, rowIndex) => (
-        <div 
-          key={rowIndex} 
+        <div
+          key={rowIndex}
           className={`flex flex-wrap justify-center gap-2 ${rowIndex > 0 ? 'mt-1' : ''}`}
         >
           {row.map((category) => {
