@@ -6,7 +6,7 @@ import navImg from "../../assets/logo-nav.png";
 import footImg from "../../assets/logo.png";
 import PricingComp from "../../components/payments/PricingComp.jsx";
 import { useAuthStore } from "../../store/auth.store.js";
-import { SpinnerHomePreview } from "../../components/recorder/SpinnerHomePreview.jsx";
+import { RecorderScreen } from "../../components/recorder/RecorderScreen.jsx";
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const STEPS = [
   {
@@ -117,7 +117,7 @@ export function LandingPage() {
       <Hero onTryClick={scrollToSpinner} />
       <HowItWorks />
       <div ref={spinnerRef} id="try-spinner">
-        <SpinnerHomePreview />
+        <RecorderScreen />
       </div>
       <SpeechCoach />
       <Audiences />

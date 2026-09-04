@@ -8,6 +8,7 @@
 // failure.
 
 import { useState } from 'react';
+import { useEntitlementStore } from '../../store/entitlement.store.js';
 import { useRecorder } from '../../features/recordings/useRecorder.js';
 import { uploadRecording } from '../../features/recordings/recordings.api.js';
 import { CategoryPicker } from './CategoryPicker.jsx';
@@ -22,6 +23,7 @@ const COLLECTIONS = [
 ];
 
 export function RecorderScreen() {
+  const { isPaid } = useEntitlementStore();
   const [topicMode, setTopicMode] = useState('spin'); // 'spin' | 'custom'
   const [topicCollection, setTopicCollection] = useState('everyday'); // 'everyday' | 'thoughtful'
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -174,11 +176,17 @@ export function RecorderScreen() {
       {status === 'idle' && (
         <button
           onClick={start}
-          disabled={!topic}
+          disabled={!isPaid || !topic}
           className="w-full rounded-full bg-red-600 px-8 py-4 font-medium text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
         >
-          <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-white align-middle" />
-          Start Recording
+          {isPaid ? (
+            <>
+              <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-white align-middle" />
+              Start Recording
+            </>
+          ) : (
+            'Subscribe to analyse'
+          )}
         </button>
       )}
 
