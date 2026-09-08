@@ -2,13 +2,30 @@
 // src/components/recorder/RecorderScreen.jsx.
 //
 // Add this import at the top of that file:
-  import { Clock, PauseCircle, MessageSquareText, Sparkles, CircleCheck, ChevronDown } from 'lucide-react';
+import {
+  Clock,
+  PauseCircle,
+  MessageSquareText,
+  Sparkles,
+  CircleCheck,
+  CircleAlert,
+  CircleHelp,
+  BookOpen,
+  ChevronDown,
+} from 'lucide-react';
 
 const RADAR_LABELS = ['On topic', 'Clarity', 'Structure', 'Vocabulary', 'Fluency'];
 
 // Words/phrases flagged as filler in the transcript display — matches the
 // amber-underline treatment used on the marketing page's speech-coach demo.
 const FILLER_PATTERN = /\b(um+|uh+|like|you know|kind of|sort of)\b/gi;
+
+const FACT_VERDICT_STYLES = {
+  accurate: { icon: CircleCheck, text: 'text-emerald-400', label: 'Checks out' },
+  inaccurate: { icon: CircleAlert, text: 'text-orange-400', label: 'Likely inaccurate' },
+  unverifiable: { icon: CircleHelp, text: 'text-gray-500', label: 'Unverified' },
+  opinion: { icon: MessageSquareText, text: 'text-gray-500', label: 'Opinion' },
+};
 
 function scoreTier(score) {
   if (score == null) return { bar: 'bg-white/10', text: 'text-gray-500', hex: '#6b7280' };
@@ -53,7 +70,7 @@ function renderTranscript(text) {
 }
 
 function ScoreRadar({ scores }) {
-  const size = 260;
+  const size = 300;
   const cx = size / 2;
   const cy = size / 2;
   const r = 84;
@@ -67,7 +84,7 @@ function ScoreRadar({ scores }) {
 
   return (
     <div className="flex justify-center rounded-2xl border border-white/10 bg-white/5 p-4">
-      <svg viewBox={`0 0 ${size} ${size}`} className="h-56 w-56 sm:h-64 sm:w-64">
+      <svg viewBox={`0 0 ${size} ${size}`} className="h-72 w-72 sm:h-72 sm:w-72">
         {rings.map((f) => (
           <polygon
             key={f}
@@ -181,6 +198,29 @@ export function ResultView({ result, onPracticeAgain }) {
         </details>
       )}
 
+      {/* Vocabulary suggestions */}
+      {feedback?.vocabularySuggestions?.length > 0 && (
+        <div className="rounded-2xl border border-blue-400/20 bg-blue-500/5 p-4">
+          <p className="flex items-center gap-1.5 text-sm font-medium text-blue-300">
+            <BookOpen className="h-4 w-4" strokeWidth={2} />
+            Level up your vocabulary
+          </p>
+          <div className="mt-3 space-y-3">
+            {feedback.vocabularySuggestions.map((v, i) => (
+              <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                <div className="flex flex-wrap items-center gap-1.5 text-sm">
+                  <span className="text-gray-500 line-through decoration-gray-600">{v.original}</span>
+                  <span className="text-gray-600">→</span>
+                  <span className="font-medium text-blue-300">{v.suggested}</span>
+                </div>
+                <p className="mt-1 text-xs text-gray-400">{v.meaning}</p>
+                <p className="mt-1.5 text-xs italic text-gray-500">"{v.example}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Strengths / improvements */}
       {(feedback?.strengths?.length > 0 || feedback?.improvements?.length > 0) && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -213,6 +253,36 @@ export function ResultView({ result, onPracticeAgain }) {
           )}
         </div>
       )}
+
+      {/* Fact check — only renders when the speaker made checkable claims */}
+      {feedback?.factChecks?.length > 0 && (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <p className="text-sm font-medium text-white">Fact check</p>
+          <p className="mt-0.5 text-[11px] text-gray-500">
+            AI-generated, not guaranteed — worth verifying anything important yourself.
+          </p>
+          <div className="mt-3 space-y-3">
+            {feedback.factChecks.map((f, i) => {
+              const style = FACT_VERDICT_STYLES[f.verdict] || FACT_VERDICT_STYLES.unverifiable;
+              const Icon = style.icon;
+              return (
+                <div key={i} className="flex gap-2">
+                  <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${style.text}`} strokeWidth={2} />
+                  <div>
+                    <p className="text-sm text-gray-300">{f.claim}</p>
+                    <p className={`text-xs ${style.text}`}>
+                      {style.label}
+                      {f.note ? ` — ${f.note}` : ''}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      
 
       {/* Suggested rewrite */}
       {rewrite && (
